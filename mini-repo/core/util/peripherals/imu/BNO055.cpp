@@ -1,4 +1,5 @@
 #include "BNO055.h"
+#include <cstdint>
 
 
 /*
@@ -7,6 +8,69 @@ I'd be impressed if you understood the math behind them.
 Basically just know that quats are 4 axis (1 real, 3 imaginary) numbers that allow us 
 to nicely talk about rotation, and the functions spit out pitch roll and yaw. 
 */
+BNO055::BNO055(I2C &i2c, uint8_t addr) noexcept:
+    _i2c_p(&i2c),
+    _i2c(i2c),
+    _res(NC),
+    chip_addr(addr),
+    cantReadDataCount(0)
+{}
+BNO055::BNO055(I2C &i2c, uint8_t addr, PinName p_reset) noexcept:
+    _i2c_p(&i2c),
+    _i2c(i2c),
+    _res(p_reset),
+    chip_addr(addr),
+    cantReadDataCount(0)
+{}
+void BNO055::init() noexcept{
+    _i2c.frequency(100000);
+    //fusion mode and reading units
+
+
+}
+void BNO055::reset() noexcept{
+    if(_res!=NC){
+        _res.write(0);
+        ThisThread::sleep_for(1); 
+        _res.write(1);
+        
+    } else{
+        char command[2] = {0x3F ,0x20};
+        _i2c.write(chip_addr,command,2,false);
+    }
+    ThisThread::sleep_for(650); 
+    init();
+}
+void BNO055::change_fusion_mode(uint8_t mode){
+    char command[2] = {0x3d,(char)mode};
+    _i2c.write(chip_addr,command,2,false);
+    ThisThread::sleep_for(650); 
+}
+void BNO055::get_accel(BNO055_VECTOR_TypeDef *la){
+    char reg = 0x08;
+    char buffer[6] = {};
+    _i2c.write(chip_addr, &reg, 1, true);
+    _i2c.read(chip_addr, buffer, 6, false);
+    double x = buffer[1] << 8 | buffer[0];
+    double  y = buffer[3] << 8 | buffer[2];
+    double z = buffer[5] << 8 | buffer[4];
+    la->x =x/100;
+    la->y =y/100;
+    la->z =z/100;
+}
+void BNO055::get_gyro(BNO055_VECTOR_TypeDef *gr){
+    char reg = 0x14;
+    char buffer[6] = {};
+    _i2c.write(chip_addr, &reg, 1, true);
+    _i2c.read(chip_addr, buffer, 6, false);
+    double x = buffer[1] << 8 | buffer[0];
+    double  y = buffer[3] << 8 | buffer[2];
+    double z = buffer[5] << 8 | buffer[4];
+    gr->x =x/16;
+    gr->y =y/16;
+    gr->z =z/16;
+
+}
 void BNO055::get_quaternion(BNO055_QUATERNION_TypeDef *result)
 {
     if (cantReadDataCount > 0 && cantReadDataCount < 50) {
@@ -26,6 +90,7 @@ void BNO055::get_quaternion(BNO055_QUATERNION_TypeDef *result)
             cantReadDataCount = 0;
         }
         _i2c.read(chip_addr, dt, 8, false);
+        // 
         w = dt[1] << 8 | dt[0];
         x = dt[3] << 8 | dt[2];
         y = dt[5] << 8 | dt[4];

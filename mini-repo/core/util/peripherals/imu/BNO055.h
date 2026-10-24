@@ -45,6 +45,7 @@ public:
      * @param double type of 3D data address
      */
     void get_accel(BNO055_VECTOR_TypeDef *la);
+        
 
     /** Get Gyro data
      * @param double type of 3D data address
