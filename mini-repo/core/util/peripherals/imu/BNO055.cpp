@@ -47,23 +47,39 @@ void BNO055::change_fusion_mode(uint8_t mode){
     ThisThread::sleep_for(650); 
 }
 void BNO055::get_accel(BNO055_VECTOR_TypeDef *la){
-    char reg = 0x08;
-    _i2c.write(chip_addr, &reg, 1, true);
+    dt[0] = 0x08;
+    int writeResult = _i2c.write(chip_addr, dt, 1, true);
+    if (!writeResult)  {
+        if (cantReadDataCount > 0) {
+            printf("RESET IMU\n");
+            reset();
+            cantReadDataCount = 0;
+        }
+    }
     _i2c.read(chip_addr, dt, 6, false);
-    double x = dt[1] << 8 | dt[0];
-    double  y = dt[3] << 8 | dt[2];
-    double z = dt[5] << 8 | dt[4];
+    int16_t w,x,y,z;
+    x = dt[1] << 8 | dt[0];
+    y = dt[3] << 8 | dt[2];
+    z = dt[5] << 8 | dt[4];
     la->x =x/100;
     la->y =y/100;
     la->z =z/100;
 }
 void BNO055::get_gyro(BNO055_VECTOR_TypeDef *gr){
-    char reg = 0x08;
-    _i2c.write(chip_addr, &reg, 1, true);
+    dt[0] = 0x14;
+    int writeResult = _i2c.write(chip_addr, dt, 1, true);
+    if (!writeResult)  {
+        if (cantReadDataCount > 0) {
+            printf("RESET IMU\n");
+            reset();
+            cantReadDataCount = 0;
+        }
+    }
     _i2c.read(chip_addr, dt, 6, false);
-    double x = dt[1] << 8 | dt[0];
-    double  y = dt[3] << 8 | dt[2];
-    double z = dt[5] << 8 | dt[4];
+    int16_t w,x,y,z;
+    x = dt[1] << 8 | dt[0];
+    y = dt[3] << 8 | dt[2];
+    z = dt[5] << 8 | dt[4];
     gr->x =x/100;
     gr->y =y/100;
     gr->z =z/100;
