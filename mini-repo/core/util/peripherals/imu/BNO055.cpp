@@ -57,7 +57,7 @@ void BNO055::get_accel(BNO055_VECTOR_TypeDef *la){
         }
     }
     _i2c.read(chip_addr, dt, 6, false);
-    int16_t w,x,y,z;
+    int16_t x,y,z;
     x = dt[1] << 8 | dt[0];
     y = dt[3] << 8 | dt[2];
     z = dt[5] << 8 | dt[4];
@@ -76,7 +76,7 @@ void BNO055::get_gyro(BNO055_VECTOR_TypeDef *gr){
         }
     }
     _i2c.read(chip_addr, dt, 6, false);
-    int16_t w,x,y,z;
+    int16_t x,y,z;
     x = dt[1] << 8 | dt[0];
     y = dt[3] << 8 | dt[2];
     z = dt[5] << 8 | dt[4];
@@ -85,6 +85,13 @@ void BNO055::get_gyro(BNO055_VECTOR_TypeDef *gr){
     gr->z =z/100;
 
 }
+IMU::EulerAngles BNO055::read(){
+    get_angular_position_quat(&imuAngles);
+    return imuAngles;
+}
+IMU::EulerAngles BNO055::getImuAngles(){
+    return imuAngles;
+ }
 void BNO055::get_quaternion(BNO055_QUATERNION_TypeDef *result)
 {
     if (cantReadDataCount > 0 && cantReadDataCount < 50) {
