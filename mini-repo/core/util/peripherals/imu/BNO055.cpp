@@ -48,27 +48,25 @@ void BNO055::change_fusion_mode(uint8_t mode){
 }
 void BNO055::get_accel(BNO055_VECTOR_TypeDef *la){
     char reg = 0x08;
-    char buffer[6] = {};
     _i2c.write(chip_addr, &reg, 1, true);
-    _i2c.read(chip_addr, buffer, 6, false);
-    double x = buffer[1] << 8 | buffer[0];
-    double  y = buffer[3] << 8 | buffer[2];
-    double z = buffer[5] << 8 | buffer[4];
+    _i2c.read(chip_addr, dt, 6, false);
+    double x = dt[1] << 8 | dt[0];
+    double  y = dt[3] << 8 | dt[2];
+    double z = dt[5] << 8 | dt[4];
     la->x =x/100;
     la->y =y/100;
     la->z =z/100;
 }
 void BNO055::get_gyro(BNO055_VECTOR_TypeDef *gr){
-    char reg = 0x14;
-    char buffer[6] = {};
+    char reg = 0x08;
     _i2c.write(chip_addr, &reg, 1, true);
-    _i2c.read(chip_addr, buffer, 6, false);
-    double x = buffer[1] << 8 | buffer[0];
-    double  y = buffer[3] << 8 | buffer[2];
-    double z = buffer[5] << 8 | buffer[4];
-    gr->x =x/16;
-    gr->y =y/16;
-    gr->z =z/16;
+    _i2c.read(chip_addr, dt, 6, false);
+    double x = dt[1] << 8 | dt[0];
+    double  y = dt[3] << 8 | dt[2];
+    double z = dt[5] << 8 | dt[4];
+    gr->x =x/100;
+    gr->y =y/100;
+    gr->z =z/100;
 
 }
 void BNO055::get_quaternion(BNO055_QUATERNION_TypeDef *result)
