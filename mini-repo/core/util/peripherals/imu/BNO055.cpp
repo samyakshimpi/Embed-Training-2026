@@ -24,8 +24,12 @@ BNO055::BNO055(I2C &i2c, uint8_t addr, PinName p_reset) noexcept:
 {}
 void BNO055::init() noexcept{
     _i2c.frequency(100000);
-    //fusion mode and reading units
-
+    reset();
+    change_fusion_mode(0x00);
+    dt[0]= 0x3B;
+    dt[1] = 0x00;
+    _i2c.write(chip_addr, dt, 2);
+    change_fusion_mode(0x0C)
 
 }
 void BNO055::reset() noexcept{
@@ -39,7 +43,6 @@ void BNO055::reset() noexcept{
         _i2c.write(chip_addr,command,2,false);
     }
     ThisThread::sleep_for(650); 
-    init();
 }
 void BNO055::change_fusion_mode(uint8_t mode){
     char command[2] = {0x3d,(char)mode};
